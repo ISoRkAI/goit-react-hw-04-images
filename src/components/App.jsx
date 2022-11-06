@@ -31,14 +31,14 @@ export default function App() {
     if (request === '') {
       return;
     }
-    setIsLoading(!isLoading);
+    setIsLoading(isLoading => isLoading);
     imgAPI
       .fetchData(request, page)
       .then(picture => {
-        setPictures([...pictures, ...picture.hits]);
+        setPictures(pictures => [...pictures, ...picture.hits]);
         setTotalHits(picture.totalHits);
       })
-      .finally(setIsLoading(isLoading));
+      .finally(setIsLoading(isLoading => isLoading));
   }, [request, page]);
 
   const onLoadMore = () => {
