@@ -1,4 +1,3 @@
-import React from 'react';
 import { ThreeCircles } from 'react-loader-spinner';
 import css from './Loader.module.css';
 
@@ -8,7 +7,7 @@ const Loader = () => {
       <ThreeCircles
         height="100"
         width="100"
-        color="#4fa94d"
+        color="#3f51b5"
         wrapperStyle={{}}
         wrapperClass=""
         visible={true}

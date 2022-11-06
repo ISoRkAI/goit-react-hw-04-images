@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
@@ -7,76 +7,59 @@ import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 import imgAPI from 'api/Requests';
 
-export default class App extends Component {
-  state = {
-    request: '',
-    pictures: [],
-    page: 1,
-    perPage: 12,
-    isLoading: false,
-    totalHits: 0,
-    showModal: false,
-    largeImageURL: null,
-  };
+export default function App() {
+  const [request, setRequest] = useState('');
+  const [pictures, setPictures] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalHits, setTotalHits] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState(null);
+  const length = pictures.length !== 0;
+  const maxLength = pictures.length !== totalHits;
 
-  hendleFormSubmit = request => {
-    if (request === this.state.request) {
+  const hendleFormSubmit = keyword => {
+    if (keyword === request) {
       return;
     }
-    this.setState({ request, page: 1 });
+    setPictures([]);
+    setRequest(keyword);
+    setPage(1);
   };
 
-  onLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-
-  componentDidUpdate(_, prevState) {
-    const { request, page, perPage } = this.state;
-    if (
-      prevState.request !== this.state.request ||
-      prevState.page !== this.state.page
-    ) {
-      imgAPI.fetchData(request, page, perPage).then(pictures => {
-        if (prevState.request !== this.state.request) {
-          this.setState({
-            pictures: [...pictures.hits],
-            totalHits: pictures.totalHits,
-          });
-          return;
-        }
-        this.setState({
-          pictures: [...prevState.pictures, ...pictures.hits],
-        });
-      });
+  useEffect(() => {
+    if (request === '') {
+      return;
     }
-  }
+    setIsLoading(!isLoading);
+    imgAPI
+      .fetchData(request, page)
+      .then(picture => {
+        setPictures([...pictures, ...picture.hits]);
+        setTotalHits(picture.totalHits);
+      })
+      .finally(setIsLoading(isLoading));
+  }, [request, page]);
 
-  toggleModal = largeImageURL => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-      largeImageURL: largeImageURL,
-    }));
+  const onLoadMore = () => {
+    setPage(page => page + 1);
   };
 
-  render() {
-    const { pictures, isLoading, totalHits, showModal, largeImageURL } =
-      this.state;
-    const length = pictures.length !== 0;
-    const maxLength = pictures.length !== totalHits;
+  const toggleModal = largeImageURL => {
+    setShowModal(showModal => !showModal);
+    setLargeImageURL(largeImageURL);
+  };
 
-    return (
-      <>
-        <Searchbar onSubmit={this.hendleFormSubmit} />
-        <ImageGallery pictures={pictures} toggleModal={this.toggleModal} />
-        {isLoading && <Loader />}
-        {!isLoading && length && maxLength && (
-          <Button onLoadMore={this.onLoadMore} />
-        )}
-        {showModal && (
-          <Modal largeImageURL={largeImageURL} onClose={this.toggleModal} />
-        )}
-        <ToastContainer theme="colored" position="top-right" autoClose={1500} />
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar onSubmit={hendleFormSubmit} />
+      <ImageGallery pictures={pictures} toggleModal={toggleModal} />
+      {isLoading && <Loader />}
+      {!isLoading && length && maxLength && <Button onLoadMore={onLoadMore} />}
+      {showModal && (
+        <Modal largeImageURL={largeImageURL} onClose={toggleModal} />
+      )}
+      <ToastContainer theme="colored" position="top-right" autoClose={1500} />
+    </>
+  );
 }
