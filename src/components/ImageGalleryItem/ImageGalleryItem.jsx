@@ -22,8 +22,8 @@ const ImageGalleryItem = ({ pictures, toggleModal }) => {
 };
 
 ImageGalleryItem.prototype = {
-  pictures: PropTypes.arrayOf(
-    PropTypes.shape({
+  pictures: PropTypes.exact(
+    PropTypes.objectOf({
       id: PropTypes.number.isRequired,
       webformatURL: PropTypes.string.isRequired,
       largeImageURL: PropTypes.string.isRequired,
