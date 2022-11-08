@@ -5,7 +5,17 @@ import css from './ImageGallery.module.css';
 const ImageGallery = ({ pictures, toggleModal }) => {
   return (
     <ul className={css.imageGallery}>
-      <ImageGalleryItem pictures={pictures} toggleModal={toggleModal} />
+      {!!pictures.length &&
+        pictures.map(({ id, webformatURL, largeImageURL }) => {
+          return (
+            <ImageGalleryItem
+              key={id}
+              webformatURL={webformatURL}
+              largeImageURL={largeImageURL}
+              toggleModal={toggleModal}
+            />
+          );
+        })}
     </ul>
   );
 };
